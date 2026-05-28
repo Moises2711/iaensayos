@@ -27,11 +27,8 @@ import {
   updateRehearsalSession,
 } from "@/lib/rehearsal-data";
 
-// IMPORTACIONES CORREGIDAS
-import {
-  createTeleprompterEnsayo,
-  teleprompterApiUrl,
-} from "@/lib/teleprompter-api";
+
+
 
 export const Route = createFileRoute("/configuracion-ensayo")({
   component: ConfigEnsayo,
