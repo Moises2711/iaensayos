@@ -14,7 +14,477 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      characters: {
+        Row: {
+          actor_type: string
+          base_emotion: string | null
+          created_at: string
+          id: string
+          name: string
+          role: string | null
+          script_id: string
+          sort_order: number
+          voice: string | null
+        }
+        Insert: {
+          actor_type?: string
+          base_emotion?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          role?: string | null
+          script_id: string
+          sort_order?: number
+          voice?: string | null
+        }
+        Update: {
+          actor_type?: string
+          base_emotion?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          role?: string | null
+          script_id?: string
+          sort_order?: number
+          voice?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfil_usuario: {
+        Row: {
+          ai_difficulty: number
+          allow_improv: boolean
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          feedback_enabled: boolean
+          notifications_enabled: boolean
+          offline_mode_enabled: boolean
+          preferred_voice: string
+          privacy_level: string
+          rehearsal_mode: string
+          suggest_emotions: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_difficulty?: number
+          allow_improv?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          feedback_enabled?: boolean
+          notifications_enabled?: boolean
+          offline_mode_enabled?: boolean
+          preferred_voice?: string
+          privacy_level?: string
+          rehearsal_mode?: string
+          suggest_emotions?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_difficulty?: number
+          allow_improv?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          feedback_enabled?: boolean
+          notifications_enabled?: boolean
+          offline_mode_enabled?: boolean
+          preferred_voice?: string
+          privacy_level?: string
+          rehearsal_mode?: string
+          suggest_emotions?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rehearsal_highlights: {
+        Row: {
+          created_at: string
+          event_time: string
+          id: string
+          note: string
+          session_id: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          event_time: string
+          id?: string
+          note: string
+          session_id: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          event_time?: string
+          id?: string
+          note?: string
+          session_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rehearsal_highlights_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "rehearsal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rehearsal_sessions: {
+        Row: {
+          ai_difficulty: number
+          allow_improv: boolean
+          clarity_score: number | null
+          completed_lines: number
+          ended_at: string | null
+          expression_score: number | null
+          feedback_enabled: boolean
+          feedback_summary: string | null
+          id: string
+          memorization_score: number | null
+          mode: string
+          projection_score: number | null
+          repeated_lines: number
+          rhythm_score: number | null
+          scene_id: string | null
+          score: number | null
+          script_id: string | null
+          selected_character_id: string | null
+          skipped_lines: number
+          started_at: string
+          status: string
+          suggest_emotions: boolean
+          teleprompter_last_event: string | null
+          teleprompter_session_id: string | null
+          teleprompter_status: string
+          total_lines: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_difficulty?: number
+          allow_improv?: boolean
+          clarity_score?: number | null
+          completed_lines?: number
+          ended_at?: string | null
+          expression_score?: number | null
+          feedback_enabled?: boolean
+          feedback_summary?: string | null
+          id?: string
+          memorization_score?: number | null
+          mode?: string
+          projection_score?: number | null
+          repeated_lines?: number
+          rhythm_score?: number | null
+          scene_id?: string | null
+          score?: number | null
+          script_id?: string | null
+          selected_character_id?: string | null
+          skipped_lines?: number
+          started_at?: string
+          status?: string
+          suggest_emotions?: boolean
+          teleprompter_last_event?: string | null
+          teleprompter_session_id?: string | null
+          teleprompter_status?: string
+          total_lines?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_difficulty?: number
+          allow_improv?: boolean
+          clarity_score?: number | null
+          completed_lines?: number
+          ended_at?: string | null
+          expression_score?: number | null
+          feedback_enabled?: boolean
+          feedback_summary?: string | null
+          id?: string
+          memorization_score?: number | null
+          mode?: string
+          projection_score?: number | null
+          repeated_lines?: number
+          rhythm_score?: number | null
+          scene_id?: string | null
+          score?: number | null
+          script_id?: string | null
+          selected_character_id?: string | null
+          skipped_lines?: number
+          started_at?: string
+          status?: string
+          suggest_emotions?: boolean
+          teleprompter_last_event?: string | null
+          teleprompter_session_id?: string | null
+          teleprompter_status?: string
+          total_lines?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rehearsal_sessions_scene_id_fkey"
+            columns: ["scene_id"]
+            isOneToOne: false
+            referencedRelation: "scenes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rehearsal_sessions_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rehearsal_sessions_selected_character_id_fkey"
+            columns: ["selected_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenes: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          script_id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          script_id: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          script_id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenes_script_id_fkey"
+            columns: ["script_id"]
+            isOneToOne: false
+            referencedRelation: "scripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      script_lines: {
+        Row: {
+          character_id: string | null
+          created_at: string
+          cue: string | null
+          duration_seconds: number
+          id: string
+          line_order: number
+          scene_id: string
+          text: string
+        }
+        Insert: {
+          character_id?: string | null
+          created_at?: string
+          cue?: string | null
+          duration_seconds?: number
+          id?: string
+          line_order: number
+          scene_id: string
+          text: string
+        }
+        Update: {
+          character_id?: string | null
+          created_at?: string
+          cue?: string | null
+          duration_seconds?: number
+          id?: string
+          line_order?: number
+          scene_id?: string
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_lines_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "script_lines_scene_id_fkey"
+            columns: ["scene_id"]
+            isOneToOne: false
+            referencedRelation: "scenes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scripts: {
+        Row: {
+          act_count: number
+          author: string | null
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          genre: string | null
+          id: string
+          imported_at: string | null
+          is_active: boolean
+          is_favorite: boolean
+          is_public: boolean
+          raw_text: string | null
+          source_type: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          act_count?: number
+          author?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          genre?: string | null
+          id?: string
+          imported_at?: string | null
+          is_active?: boolean
+          is_favorite?: boolean
+          is_public?: boolean
+          raw_text?: string | null
+          source_type?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          act_count?: number
+          author?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          genre?: string | null
+          id?: string
+          imported_at?: string | null
+          is_active?: boolean
+          is_favorite?: boolean
+          is_public?: boolean
+          raw_text?: string | null
+          source_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      teleprompter_recordings: {
+        Row: {
+          audio_url: string | null
+          character_name: string
+          created_at: string
+          duration_sec: number | null
+          id: string
+          recording_id: string | null
+          rehearsal_session_id: string
+          segment_index: number
+          segment_text: string | null
+          teleprompter_session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_url?: string | null
+          character_name: string
+          created_at?: string
+          duration_sec?: number | null
+          id?: string
+          recording_id?: string | null
+          rehearsal_session_id: string
+          segment_index: number
+          segment_text?: string | null
+          teleprompter_session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_url?: string | null
+          character_name?: string
+          created_at?: string
+          duration_sec?: number | null
+          id?: string
+          recording_id?: string | null
+          rehearsal_session_id?: string
+          segment_index?: number
+          segment_text?: string | null
+          teleprompter_session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teleprompter_recordings_rehearsal_session_id_fkey"
+            columns: ["rehearsal_session_id"]
+            isOneToOne: false
+            referencedRelation: "rehearsal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
