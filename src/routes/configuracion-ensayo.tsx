@@ -158,33 +158,18 @@ function ConfigEnsayo() {
         totalLines: setup.lines.length,
       });
 
-      // 2. LÓGICA CORREGIDA PARA FASTAPI
-      try {
-        const teleprompterSession = await createTeleprompterEnsayo({
-          idObra: setup.script.id,
-          modoEnsayo: mode,
-        });
+      // 2. Sesión de teleprompter local (transcripción vía Lovable AI, sin backend externo)
+      const localSessionId =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `local-${Date.now()}`;
 
-        return updateRehearsalSession(rehearsal.id, {
-          teleprompter_session_id: teleprompterSession.id_ensayo,
-          teleprompter_status: "ready",
-          teleprompter_last_event: `Sesion FastAPI creada (Ensayo ID: ${teleprompterSession.id_ensayo})`,
-        });
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "No se pudo conectar con el backend del teleprompter.";
+      return updateRehearsalSession(rehearsal.id, {
+        teleprompter_session_id: localSessionId,
+        teleprompter_status: "ready",
+        teleprompter_last_event: `Sesión lista (Lovable AI, ID: ${localSessionId})`,
+      });
 
-        await updateRehearsalSession(rehearsal.id, {
-          teleprompter_status: "error",
-          teleprompter_last_event: message,
-        }).catch(() => null);
-
-        throw new Error(
-          `El ensayo se guardo en Postgres, pero no se pudo iniciar el teleprompter: ${message}`,
-        );
-      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recent-rehearsals"] });
