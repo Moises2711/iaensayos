@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -72,19 +73,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Cine Estrella — Ensaya teatro con IA" },
+      { name: "description", content: "Practica escenas, interpreta personajes y deja que la IA complete los demás papeles." },
+      { name: "author", content: "Cine Estrella" },
+      { property: "og:title", content: "Cine Estrella — Ensaya teatro con IA" },
+      { property: "og:description", content: "Practica escenas, interpreta personajes y deja que la IA complete los demás papeles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Cine Estrella — Ensaya teatro con IA" },
+      { name: "twitter:description", content: "Practica escenas, interpreta personajes y deja que la IA complete los demás papeles." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/17cea9aa-bf06-4410-8ab7-0032ff743ad7" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/17cea9aa-bf06-4410-8ab7-0032ff743ad7" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap",
       },
     ],
   }),
@@ -113,8 +121,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <Toaster />
     </QueryClientProvider>
   );
 }
