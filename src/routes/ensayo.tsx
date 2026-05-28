@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   Square,
@@ -9,25 +10,21 @@ import {
   Mic,
   MicOff,
   Volume2,
-  Pause,
   SkipBack,
   SkipForward,
   RotateCcw,
   Play,
-  ChevronDown,
-  History,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
 import {
   getLatestRehearsal,
   getScriptSetup,
-  updateRehearsalSession,
   type ScriptLineWithCharacter,
 } from "@/lib/rehearsal-data";
 
-// NUEVAS IMPORTACIONES: API REST en lugar de WebSockets
-import { startRecording, stopRecording } from "@/lib/teleprompter-api";
+import { startMicRecording, type RecorderHandle } from "@/lib/teleprompter-recorder";
+import { transcribeAudio } from "@/lib/teleprompter.functions";
 
 export const Route = createFileRoute("/ensayo")({
   component: Ensayo,
