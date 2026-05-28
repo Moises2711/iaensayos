@@ -198,7 +198,7 @@ async function getRowsById<T extends { id: string }>(
   const { data, error } = await supabase.from(table).select("*").in("id", ids);
   if (error) throw error;
 
-  return new Map(((data as T[] | null) ?? []).map((item) => [item.id, item]));
+  return new Map(((data as unknown as T[] | null) ?? []).map((item) => [item.id, item]));
 }
 
 export async function getSceneLines(sceneId: string): Promise<ScriptLineWithCharacter[]> {
