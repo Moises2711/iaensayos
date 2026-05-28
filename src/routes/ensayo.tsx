@@ -48,6 +48,9 @@ function Ensayo() {
   const [connectionStatus, setConnectionStatus] = useState("Esperando para iniciar...");
   const [isRehearsing, setIsRehearsing] = useState(false);
   const [activeLineIndex, setActiveLineIndex] = useState(0);
+  const [lastTranscript, setLastTranscript] = useState<string | null>(null);
+  const recorderRef = useRef<RecorderHandle | null>(null);
+  const transcribe = useServerFn(transcribeAudio);
 
   const { data: latest, isLoading: rehearsalLoading } = useQuery({
     queryKey: ["latest-rehearsal"],
