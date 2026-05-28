@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   Square,
@@ -9,25 +10,21 @@ import {
   Mic,
   MicOff,
   Volume2,
-  Pause,
   SkipBack,
   SkipForward,
   RotateCcw,
   Play,
-  ChevronDown,
-  History,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
 import {
   getLatestRehearsal,
   getScriptSetup,
-  updateRehearsalSession,
   type ScriptLineWithCharacter,
 } from "@/lib/rehearsal-data";
 
-// NUEVAS IMPORTACIONES: API REST en lugar de WebSockets
-import { startRecording, stopRecording } from "@/lib/teleprompter-api";
+import { startMicRecording, type RecorderHandle } from "@/lib/teleprompter-recorder";
+import { transcribeAudio } from "@/lib/teleprompter.functions";
 
 export const Route = createFileRoute("/ensayo")({
   component: Ensayo,
@@ -51,6 +48,9 @@ function Ensayo() {
   const [connectionStatus, setConnectionStatus] = useState("Esperando para iniciar...");
   const [isRehearsing, setIsRehearsing] = useState(false);
   const [activeLineIndex, setActiveLineIndex] = useState(0);
+  const [lastTranscript, setLastTranscript] = useState<string | null>(null);
+  const recorderRef = useRef<RecorderHandle | null>(null);
+  const transcribe = useServerFn(transcribeAudio);
 
   const { data: latest, isLoading: rehearsalLoading } = useQuery({
     queryKey: ["latest-rehearsal"],
@@ -82,42 +82,48 @@ function Ensayo() {
 
   const isMyTurn = currentLine?.character_id === selectedCharacter?.id;
 
-  // ─── NUEVA LÓGICA DE GRABACIÓN REST ─────────────────────────────
+  // ─── Grabación con MediaRecorder + transcripción vía Lovable AI ───
   const handleToggleRecording = async () => {
-    if (!teleprompterSessionId || !selectedCharacter || !currentLine) {
-      toast.error("Faltan datos (Ensayo, Personaje o Línea) para grabar.");
+    if (!selectedCharacter || !currentLine) {
+      toast.error("Selecciona personaje y línea antes de grabar.");
       return;
     }
 
-    if (isRehearsing) {
+    if (isRehearsing && recorderRef.current) {
       try {
-        setConnectionStatus("Procesando y guardando audio...");
+        setConnectionStatus("Procesando audio...");
         setIsRehearsing(false);
-        await stopRecording();
-        setConnectionStatus(`Toma guardada para línea ${activeLineIndex + 1}`);
-        toast.success("Audio guardado exitosamente");
-
-        // Auto-avanzar a la siguiente línea si existe
+        const { audioBase64, mediaType } = await recorderRef.current.stop();
+        recorderRef.current = null;
+        const { transcript } = await transcribe({
+          data: {
+            audioBase64,
+            mediaType,
+            referenceText: currentLine.text ?? undefined,
+          },
+        });
+        setLastTranscript(transcript);
+        setConnectionStatus(`Transcripción línea ${activeLineIndex + 1}`);
+        toast.success("Audio transcrito");
         if (activeLineIndex < lines.length - 1) {
           setActiveLineIndex((prev) => prev + 1);
         }
       } catch (error) {
-        toast.error("Error al detener grabación. ¿Está corriendo FastAPI?");
-        setConnectionStatus("Error de conexión");
+        console.error(error);
+        toast.error("Error al transcribir el audio.");
+        setConnectionStatus("Error en transcripción");
       }
     } else {
       try {
-        setConnectionStatus("Grabando micrófono... (Habla ahora)");
+        setConnectionStatus("Grabando micrófono...");
+        const handle = await startMicRecording();
+        recorderRef.current = handle;
         setIsRehearsing(true);
-        await startRecording({
-          idEnsayo: teleprompterSessionId,
-          idActor: selectedCharacter.id,
-          idLinea: currentLine.id,
-        });
       } catch (error) {
+        console.error(error);
         setIsRehearsing(false);
-        toast.error("Error al iniciar grabación. Revisa tu backend en Python.");
-        setConnectionStatus("Error al conectar con Python");
+        toast.error("No se pudo acceder al micrófono.");
+        setConnectionStatus("Sin acceso al micrófono");
       }
     }
   };
