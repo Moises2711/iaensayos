@@ -74,7 +74,7 @@ function ConfigEnsayo() {
   });
   const { data: scripts = [], isLoading: scriptsLoading } = useQuery({
     queryKey: ["scripts"],
-    queryFn: getScripts,
+    queryFn: () => getScripts(),
   });
   const { data: setup, isLoading: setupLoading } = useQuery({
     queryKey: ["script-setup", selectedScriptId, selectedSceneId],
