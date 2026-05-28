@@ -431,7 +431,7 @@ function ConfigEnsayo() {
             <div>
               <div className="text-primary">Listo para sincronizar tu ensayo.</div>
               <div className="text-muted-foreground">
-                Postgres + FastAPI en {teleprompterApiUrl("/health")}.
+                Transcripción en vivo con Lovable AI (sin backend externo).
               </div>
             </div>
           </div>
