@@ -99,7 +99,7 @@ function Ensayo() {
           data: {
             audioBase64,
             mediaType,
-            referenceText: currentLine.line_text ?? undefined,
+            referenceText: currentLine.text ?? undefined,
           },
         });
         setLastTranscript(transcript);
