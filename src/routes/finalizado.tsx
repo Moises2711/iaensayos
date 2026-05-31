@@ -156,45 +156,6 @@ function Row({ icon: Icon, k, v }: { icon: typeof BookOpen; k: string; v: React.
   );
 }
 
-function Stat({
-  icon: Icon,
-  value,
-  label,
-  tone,
-}: {
-  icon: typeof Check;
-  value: string;
-  label: string;
-  tone: "success" | "primary" | "destructive";
-}) {
-  const colors = {
-    success: "text-success border-success/30",
-    primary: "text-primary border-primary/30",
-    destructive: "text-destructive border-destructive/30",
-  }[tone];
-  return (
-    <div className="text-center">
-      <div className={`w-9 h-9 mx-auto mb-1 rounded-full border grid place-items-center ${colors}`}>
-        <Icon className="w-4 h-4" />
-      </div>
-      <div className="text-xl font-display">{value}</div>
-      <div className="text-[10px] text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
-function Next({ icon: Icon, title, sub }: { icon: typeof FileEdit; title: string; sub: string }) {
-  return (
-    <button className="w-full flex items-start gap-3 p-2.5 rounded-lg bg-surface border border-border/40 hover:border-primary/40 transition text-left">
-      <Icon className="w-4 h-4 text-primary mt-0.5" />
-      <div className="flex-1">
-        <div className="text-sm">{title}</div>
-        <div className="text-xs text-muted-foreground">{sub}</div>
-      </div>
-      <ChevronRight className="w-4 h-4 text-muted-foreground" />
-    </button>
-  );
-}
 
 function formatDate(value?: string) {
   if (!value) return "Sin fecha";
