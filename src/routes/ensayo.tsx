@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
@@ -18,6 +18,7 @@ import {
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
 import {
+  finalizeRehearsalSession,
   getLatestRehearsal,
   getScriptSetup,
   type ScriptLineWithCharacter,
@@ -186,12 +187,15 @@ function Ensayo() {
             Ritmo: <span className="text-primary">{modeLabel(latest?.mode ?? "individual")}</span>
           </div>
         </div>
-        <Link
-          to="/finalizado"
-          className="ml-auto inline-flex items-center gap-2 border border-destructive/50 text-destructive rounded-lg px-3 py-2 text-sm hover:bg-destructive/10"
+        <button
+          type="button"
+          onClick={handleFinalizar}
+          disabled={finalizeMutation.isPending}
+          className="ml-auto inline-flex items-center gap-2 border border-destructive/50 text-destructive rounded-lg px-3 py-2 text-sm hover:bg-destructive/10 disabled:opacity-60"
         >
-          <Square className="w-3.5 h-3.5 fill-current" /> Finalizar ensayo
-        </Link>
+          <Square className="w-3.5 h-3.5 fill-current" />
+          {finalizeMutation.isPending ? "Finalizando..." : "Finalizar ensayo"}
+        </button>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_300px] gap-5">
