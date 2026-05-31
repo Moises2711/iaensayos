@@ -52,6 +52,36 @@ function Ensayo() {
   const [lastTranscript, setLastTranscript] = useState<string | null>(null);
   const recorderRef = useRef<RecorderHandle | null>(null);
   const transcribe = useServerFn(transcribeAudio);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const finalizeMutation = useMutation({
+    mutationFn: async () => {
+      if (recorderRef.current) {
+        try {
+          await recorderRef.current.stop();
+        } catch {
+          /* ignore */
+        }
+        recorderRef.current = null;
+      }
+      setIsRehearsing(false);
+      if (!latest?.id) return null;
+      return finalizeRehearsalSession(latest.id, {
+        completed_lines: Math.max(latest.completed_lines ?? 0, activeLineIndex + 1),
+        total_lines: latest.total_lines || lines.length,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["latest-rehearsal"] });
+      queryClient.invalidateQueries({ queryKey: ["rehearsal-sessions"] });
+      toast.success("Ensayo finalizado");
+      navigate({ to: "/finalizado" });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "No se pudo finalizar"),
+  });
+
+  const handleFinalizar = () => finalizeMutation.mutate();
 
   const { data: latest, isLoading: rehearsalLoading } = useQuery({
     queryKey: ["latest-rehearsal"],
