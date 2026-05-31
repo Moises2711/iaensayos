@@ -7,15 +7,9 @@ import {
   Crown,
   Drama,
   Sparkles,
-  BarChart3,
-  Download,
   Check,
-  RotateCcw,
-  X,
-  ChevronRight,
-  FileEdit,
   Repeat,
-  FileMusic,
+  Home,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
@@ -35,24 +29,6 @@ function Finalizado() {
     queryFn: getPerfilUsuario,
   });
   const profile = profileData?.profile;
-  const scores = [
-    { label: "Claridad", value: report?.clarity_score ?? 0 },
-    { label: "Expresion", value: report?.expression_score ?? 0 },
-    { label: "Ritmo", value: report?.rhythm_score ?? 0 },
-    { label: "Proyeccion", value: report?.projection_score ?? 0 },
-    { label: "Memorizacion", value: report?.memorization_score ?? 0 },
-  ];
-  const measuredScores = scores.filter((item) => item.value > 0);
-  const overall =
-    report?.score ??
-    (measuredScores.length
-      ? Math.round(
-          measuredScores.reduce((sum, item) => sum + item.value, 0) / measuredScores.length,
-        )
-      : 0);
-  const r = 56;
-  const c = 2 * Math.PI * r;
-  const offset = c - (overall / 100) * c;
   const completed = report?.completed_lines ?? 0;
   const total = report?.total_lines || completed || 1;
   const completedPercent = Math.min(100, Math.round((completed / total) * 100));
