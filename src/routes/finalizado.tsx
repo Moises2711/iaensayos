@@ -105,143 +105,42 @@ function Finalizado() {
         </div>
 
         <div className="bg-card border border-border/60 rounded-xl p-5">
-          <h3 className="font-medium mb-4">Tu desempeno</h3>
-          <div className="grid grid-cols-[auto_1fr] gap-6 items-center">
-            <div className="relative w-36 h-36">
-              <svg viewBox="0 0 128 128" className="w-full h-full -rotate-90">
-                <circle cx="64" cy="64" r={r} stroke="var(--border)" strokeWidth="8" fill="none" />
-                <circle
-                  cx="64"
-                  cy="64"
-                  r={r}
-                  stroke="url(#g)"
-                  strokeWidth="8"
-                  fill="none"
-                  strokeDasharray={c}
-                  strokeDashoffset={offset}
-                  strokeLinecap="round"
-                />
-                <defs>
-                  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="oklch(0.78 0.16 60)" />
-                    <stop offset="100%" stopColor="oklch(0.85 0.18 70)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="absolute inset-0 grid place-items-center">
-                <div className="text-center">
-                  <div className="text-3xl font-display text-primary">{overall}%</div>
-                  <div className="text-[10px] text-muted-foreground tracking-widest uppercase">
-                    {overall >= 85 ? "Muy bien" : overall >= 70 ? "Buen avance" : "En practica"}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {scores.map((score) => (
-                <div key={score.label}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">{score.label}</span>
-                    <span>{score.value}%</span>
-                  </div>
-                  <div className="h-1 rounded-full bg-surface overflow-hidden">
-                    <div
-                      className="h-full bg-primary-gradient"
-                      style={{ width: `${score.value}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+          <h3 className="font-medium mb-4">Progreso de la escena</h3>
+          <div className="flex justify-between text-xs mb-2">
+            <span className="text-muted-foreground">Lineas completadas</span>
+            <span>
+              {completed} / {total}
+            </span>
           </div>
-          <div className="mt-4 rounded-lg bg-primary/10 border border-primary/20 p-3 text-xs flex items-start gap-2">
+          <div className="h-1.5 rounded-full bg-surface mb-5 overflow-hidden">
+            <div
+              className="h-full bg-primary-gradient"
+              style={{ width: `${completedPercent}%` }}
+            />
+          </div>
+          <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 text-xs flex items-start gap-2">
             <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-            <p>
-              {report?.feedback_summary ?? "Completa un ensayo para generar retroalimentacion."}
+            <p className="text-muted-foreground">
+              Las metricas de desempeno se generaran cuando integremos el analisis con IA.
+              Por ahora, registramos el avance de tu sesion.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-5 mb-6">
-        <div className="bg-card border border-border/60 rounded-xl p-5">
-          <h3 className="font-medium mb-3">Progreso de la escena</h3>
-          <div className="flex justify-between text-xs mb-2">
-            <span className="text-muted-foreground">Completado</span>
-            <span>
-              {completed} / {total} lineas
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-surface mb-5 overflow-hidden">
-            <div className="h-full bg-primary-gradient" style={{ width: `${completedPercent}%` }} />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <Stat icon={Check} value={`${completed}`} label="Lineas acertadas" tone="success" />
-            <Stat
-              icon={RotateCcw}
-              value={`${report?.repeated_lines ?? 0}`}
-              label="Lineas repetidas"
-              tone="primary"
-            />
-            <Stat
-              icon={X}
-              value={`${report?.skipped_lines ?? 0}`}
-              label="Lineas omitidas"
-              tone="destructive"
-            />
-          </div>
-        </div>
-
-        <div className="bg-card border border-border/60 rounded-xl p-5">
-          <h3 className="font-medium mb-3">Momentos destacados</h3>
-          <div className="space-y-3">
-            {(report?.highlights.length ? report.highlights : []).map((highlight) => (
-              <div key={highlight.id} className="flex items-start gap-3 text-sm">
-                <span className="text-success font-mono text-xs mt-0.5">
-                  {highlight.event_time}
-                </span>
-                <span className="text-foreground/90">{highlight.note}</span>
-              </div>
-            ))}
-            {(!report || report.highlights.length === 0) && (
-              <p className="text-sm text-muted-foreground">Sin momentos destacados guardados.</p>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border/60 rounded-xl p-5">
-          <h3 className="font-medium mb-3">Siguientes pasos</h3>
-          <div className="space-y-2">
-            <Next
-              icon={FileEdit}
-              title="Revisar mis errores"
-              sub="Ve las lineas que puedes mejorar"
-            />
-            <Next icon={Repeat} title="Repetir esta escena" sub="Practica nuevamente desde aqui" />
-            <Next
-              icon={FileMusic}
-              title="Continuar con la siguiente escena"
-              sub="Sigue con otra escena del libreto"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-card border border-border/60 rounded-xl p-4">
-        <button className="inline-flex items-center gap-2 text-sm border border-border bg-surface rounded-lg px-4 py-2 hover:border-primary/40">
-          <BarChart3 className="w-4 h-4" /> Ver reporte detallado
-        </button>
-        <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 text-sm border border-border bg-surface rounded-lg px-4 py-2 hover:border-primary/40">
-            <Download className="w-4 h-4" /> Exportar reporte
-          </button>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm bg-primary-gradient text-primary-foreground rounded-lg px-5 py-2 font-medium shadow-glow"
-          >
-            <Check className="w-4 h-4" /> Finalizar sesion
-          </Link>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-3 bg-card border border-border/60 rounded-xl p-4">
+        <Link
+          to="/configuracion-ensayo"
+          className="inline-flex items-center gap-2 text-sm border border-border bg-surface rounded-lg px-4 py-2 hover:border-primary/40"
+        >
+          <Repeat className="w-4 h-4" /> Repetir ensayo
+        </Link>
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm bg-primary-gradient text-primary-foreground rounded-lg px-5 py-2 font-medium shadow-glow"
+        >
+          <Home className="w-4 h-4" /> Ir al inicio
+        </Link>
       </div>
     </AppShell>
   );
