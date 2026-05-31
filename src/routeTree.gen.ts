@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LibretosRouteImport } from './routes/libretos'
+import { Route as GruposRouteImport } from './routes/grupos'
 import { Route as FinalizadoRouteImport } from './routes/finalizado'
 import { Route as EnsayosRouteImport } from './routes/ensayos'
 import { Route as EnsayoRouteImport } from './routes/ensayo'
@@ -32,6 +33,11 @@ const LoginRoute = LoginRouteImport.update({
 const LibretosRoute = LibretosRouteImport.update({
   id: '/libretos',
   path: '/libretos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GruposRoute = GruposRouteImport.update({
+  id: '/grupos',
+  path: '/grupos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FinalizadoRoute = FinalizadoRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/ensayo': typeof EnsayoRoute
   '/ensayos': typeof EnsayosRoute
   '/finalizado': typeof FinalizadoRoute
+  '/grupos': typeof GruposRoute
   '/libretos': typeof LibretosRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/ensayo': typeof EnsayoRoute
   '/ensayos': typeof EnsayosRoute
   '/finalizado': typeof FinalizadoRoute
+  '/grupos': typeof GruposRoute
   '/libretos': typeof LibretosRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/ensayo': typeof EnsayoRoute
   '/ensayos': typeof EnsayosRoute
   '/finalizado': typeof FinalizadoRoute
+  '/grupos': typeof GruposRoute
   '/libretos': typeof LibretosRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/ensayo'
     | '/ensayos'
     | '/finalizado'
+    | '/grupos'
     | '/libretos'
     | '/login'
     | '/register'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/ensayo'
     | '/ensayos'
     | '/finalizado'
+    | '/grupos'
     | '/libretos'
     | '/login'
     | '/register'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/ensayo'
     | '/ensayos'
     | '/finalizado'
+    | '/grupos'
     | '/libretos'
     | '/login'
     | '/register'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   EnsayoRoute: typeof EnsayoRoute
   EnsayosRoute: typeof EnsayosRoute
   FinalizadoRoute: typeof FinalizadoRoute
+  GruposRoute: typeof GruposRoute
   LibretosRoute: typeof LibretosRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -168,6 +181,13 @@ declare module '@tanstack/react-router' {
       path: '/libretos'
       fullPath: '/libretos'
       preLoaderRoute: typeof LibretosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grupos': {
+      id: '/grupos'
+      path: '/grupos'
+      fullPath: '/grupos'
+      preLoaderRoute: typeof GruposRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/finalizado': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   EnsayoRoute: EnsayoRoute,
   EnsayosRoute: EnsayosRoute,
   FinalizadoRoute: FinalizadoRoute,
+  GruposRoute: GruposRoute,
   LibretosRoute: LibretosRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
@@ -229,3 +250,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
