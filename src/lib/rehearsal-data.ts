@@ -645,6 +645,142 @@ export async function updateRehearsalSession(
   return data;
 }
 
+export async function finalizeRehearsalSession(
+  sessionId: string,
+  patch: { completed_lines?: number; total_lines?: number } = {},
+) {
+  return updateRehearsalSession(sessionId, {
+    ...patch,
+    status: "finalizado",
+    ended_at: new Date().toISOString(),
+    teleprompter_status: "finalizado",
+  });
+}
+
+export async function closeOpenRehearsalSessions() {
+  const user = await getCurrentUser();
+  if (!user) return;
+  await supabase
+    .from("rehearsal_sessions")
+    .update({
+      status: "finalizado",
+      ended_at: new Date().toISOString(),
+      teleprompter_status: "finalizado",
+    })
+    .eq("user_id", user.id)
+    .neq("status", "finalizado");
+}
+
+// ─────────────────────────── Grupos de ensayo ───────────────────────────
+export type RehearsalGroupRecord = Tables<"rehearsal_groups">;
+export type RehearsalGroupMemberRecord = Tables<"rehearsal_group_members">;
+
+export type RehearsalGroupWithMeta = RehearsalGroupRecord & {
+  memberCount: number;
+  myRole: string;
+};
+
+function generateInviteCode(length = 8) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  const buf = new Uint8Array(length);
+  if (typeof crypto !== "undefined" && "getRandomValues" in crypto) {
+    crypto.getRandomValues(buf);
+  } else {
+    for (let i = 0; i < length; i++) buf[i] = Math.floor(Math.random() * 256);
+  }
+  for (let i = 0; i < length; i++) out += alphabet[buf[i] % alphabet.length];
+  return out;
+}
+
+export async function getMyRehearsalGroups(): Promise<RehearsalGroupWithMeta[]> {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const { data: memberships, error: memErr } = await supabase
+    .from("rehearsal_group_members")
+    .select("group_id, role")
+    .eq("user_id", user.id);
+  if (memErr) throw memErr;
+  if (!memberships?.length) return [];
+
+  const groupIds = memberships.map((m) => m.group_id);
+  const { data: groups, error: groupsErr } = await supabase
+    .from("rehearsal_groups")
+    .select("*")
+    .in("id", groupIds)
+    .order("created_at", { ascending: false });
+  if (groupsErr) throw groupsErr;
+
+  const { data: allMembers, error: countErr } = await supabase
+    .from("rehearsal_group_members")
+    .select("group_id")
+    .in("group_id", groupIds);
+  if (countErr) throw countErr;
+
+  const countsByGroup = new Map<string, number>();
+  for (const row of allMembers ?? []) {
+    countsByGroup.set(row.group_id, (countsByGroup.get(row.group_id) ?? 0) + 1);
+  }
+  const roleByGroup = new Map(memberships.map((m) => [m.group_id, m.role]));
+
+  return (groups ?? []).map((g) => ({
+    ...g,
+    memberCount: countsByGroup.get(g.id) ?? 0,
+    myRole: roleByGroup.get(g.id) ?? "member",
+  }));
+}
+
+export async function createRehearsalGroup(input: { name: string; description?: string }) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Inicia sesion para crear un grupo.");
+
+  // Reintenta hasta 4 veces si hay colisión de invite_code.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const invite_code = generateInviteCode(8);
+    const { data, error } = await supabase
+      .from("rehearsal_groups")
+      .insert({
+        name: input.name.trim(),
+        description: input.description?.trim() || null,
+        invite_code,
+        owner_id: user.id,
+      })
+      .select("*")
+      .single();
+
+    if (!error && data) return data;
+    if (error && error.code !== "23505") throw error; // 23505 = unique_violation
+  }
+  throw new Error("No se pudo generar un codigo de invitacion unico. Intenta de nuevo.");
+}
+
+export async function deleteRehearsalGroup(groupId: string) {
+  const { error } = await supabase.from("rehearsal_groups").delete().eq("id", groupId);
+  if (error) throw error;
+}
+
+export async function leaveRehearsalGroup(groupId: string) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Inicia sesion para abandonar el grupo.");
+  const { error } = await supabase
+    .from("rehearsal_group_members")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("user_id", user.id);
+  if (error) throw error;
+}
+
+export async function getGroupMembers(groupId: string) {
+  const { data, error } = await supabase
+    .from("rehearsal_group_members")
+    .select("*")
+    .eq("group_id", groupId)
+    .order("joined_at", { ascending: true });
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function createTeleprompterRecording(
   recording: Omit<TablesInsert<"teleprompter_recordings">, "user_id">,
 ) {
