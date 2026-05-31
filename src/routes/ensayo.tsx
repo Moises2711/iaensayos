@@ -21,6 +21,7 @@ import {
   finalizeRehearsalSession,
   getLatestRehearsal,
   getScriptSetup,
+  syncRecordingToBackend,
   type ScriptLineWithCharacter,
 } from "@/lib/rehearsal-data";
 
@@ -54,6 +55,7 @@ function Ensayo() {
   const [lastTranscript, setLastTranscript] = useState<string | null>(null);
   const recorderRef = useRef<RecorderHandle | null>(null);
   const transcribe = useServerFn(transcribeAudio);
+  const syncRecording = useServerFn(syncRecordingToBackend);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -139,8 +141,9 @@ function Ensayo() {
         recorderRef.current = null;
 
         // Save Blob to IndexedDB (instant, no UI blocking)
+        const currentSessionId = latest?.id ?? 'unknown';
         const recordingId = await recordingService.saveRecording({
-          sessionId: latest?.id ?? 'unknown',
+          sessionId: currentSessionId,
           userId: 'current-user', // TODO: Get from auth context
           audioBlob,
           audioFormat: mediaType,
@@ -153,6 +156,7 @@ function Ensayo() {
         const formData = new FormData();
         formData.append('audioFile', audioBlob);
         formData.append('mediaType', mediaType);
+        formData.append('sessionId', currentSessionId);
         formData.append('referenceText', currentLine.text ?? '');
 
         const { transcript } = await transcribe({
@@ -171,6 +175,24 @@ function Ensayo() {
           transcript,
           duration_ms: durationMs,
         });
+
+        // Attempt immediate backend metadata sync
+        try {
+          await syncRecording({
+            data: {
+              sessionId: currentSessionId,
+              transcript,
+              confidence: 0.95,
+              duration_ms: durationMs,
+            },
+          });
+
+          await recordingService.updateRecording(recordingId, {
+            synced: true,
+          });
+        } catch (syncError) {
+          console.warn("Metadata sync deferred:", syncError);
+        }
 
         setLastTranscript(transcript);
         setConnectionStatus(`Transcripción línea ${activeLineIndex + 1}`);

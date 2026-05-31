@@ -1,3 +1,5 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert, TablesUpdate } from "@/integrations/supabase/types";
 
@@ -223,12 +225,44 @@ export async function getSceneLines(sceneId: string): Promise<ScriptLineWithChar
 }
 
 export async function getScriptSetup(scriptId?: string, sceneId?: string): Promise<ScriptSetup> {
-  const scripts = await getScripts();
-  const script =
-    scripts.find((item) => item.id === scriptId) ??
-    scripts.find((item) => item.is_active) ??
-    scripts[0] ??
-    null;
+  let script: ScriptRecord | null = null;
+
+  if (scriptId) {
+    const { data, error } = await supabase
+      .from("scripts")
+      .select("*")
+      .eq("id", scriptId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (error) throw error;
+    script = data ?? null;
+  } else {
+    const { data, error } = await supabase
+      .from("scripts")
+      .select("*")
+      .eq("is_active", true)
+      .is("deleted_at", null)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    script = data ?? null;
+
+    if (!script) {
+      const { data: fallbackScript, error: fallbackError } = await supabase
+        .from("scripts")
+        .select("*")
+        .is("deleted_at", null)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (fallbackError) throw fallbackError;
+      script = fallbackScript ?? null;
+    }
+  }
 
   if (!script) {
     return { script: null, scenes: [], scene: null, characters: [], lines: [] };
@@ -250,6 +284,88 @@ export async function getScriptSetup(scriptId?: string, sceneId?: string): Promi
     lines,
   };
 }
+
+export async function syncRecordingMetadata(input: {
+  sessionId: string;
+  transcript: string;
+  confidence: number;
+  duration_ms: number;
+  userId?: string;
+}) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Must be authenticated");
+
+  if (!input.transcript || input.transcript.trim().length === 0) {
+    throw new Error("Transcript cannot be empty");
+  }
+
+  if (input.userId && input.userId !== user.id) {
+    throw new Error("User ID mismatch");
+  }
+
+  const metadataPayload = {
+    session_id: input.sessionId,
+    user_id: user.id,
+    transcript: input.transcript,
+    confidence: input.confidence,
+    duration_ms: input.duration_ms,
+    source: "local_browser",
+    created_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from("rehearsal_recordings_metadata" as any)
+    .insert(metadataPayload)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+
+  await supabase
+    .from("rehearsal_sessions")
+    .update({
+      latest_transcript: input.transcript,
+      latest_confidence: input.confidence,
+      recordings_count: await getRecordingCount(input.sessionId),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.sessionId)
+    .eq("user_id", user.id);
+
+  return data;
+}
+
+async function getRecordingCount(sessionId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("rehearsal_recordings_metadata" as any)
+    .select("*", { count: "exact", head: true })
+    .eq("session_id", sessionId);
+
+  if (error) throw error;
+  return count || 0;
+}
+
+export const syncRecordingToBackend = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => {
+    if (typeof input !== "object" || input === null) throw new Error("Invalid input");
+    const data = input as Record<string, unknown>;
+
+    const sessionId = data.sessionId as string;
+    const transcript = data.transcript as string;
+    const confidence = (data.confidence as number) || 0.95;
+    const duration_ms = (data.duration_ms as number) || 0;
+    const userId = data.userId as string;
+
+    if (!sessionId) throw new Error("sessionId required");
+    if (!transcript) throw new Error("transcript required");
+    if (!userId) throw new Error("userId required");
+
+    return { sessionId, transcript, confidence, duration_ms, userId };
+  })
+  .handler(async ({ data }) => {
+    return syncRecordingMetadata(data);
+  });
 
 export async function getScriptDetails(scriptId: string): Promise<ScriptDetails> {
   const [scenes, characters] = await Promise.all([
