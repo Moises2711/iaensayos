@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -26,6 +26,8 @@ import {
 
 import { startMicRecording, type RecorderHandle } from "@/lib/teleprompter-recorder";
 import { transcribeAudio } from "@/lib/teleprompter.functions";
+import { recordingService } from "@/services/recordingService";
+import { syncService } from "@/services/syncService";
 
 export const Route = createFileRoute("/ensayo")({
   component: Ensayo,
@@ -54,6 +56,13 @@ function Ensayo() {
   const transcribe = useServerFn(transcribeAudio);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Initialize IndexedDB + sync services on mount
+  useEffect(() => {
+    recordingService.init().catch(console.error);
+    syncService.init().catch(console.error);
+    syncService.syncNow().catch(console.error); // Initial sync
+  }, []);
 
   const finalizeMutation = useMutation({
     mutationFn: async () => {
@@ -113,7 +122,7 @@ function Ensayo() {
 
   const isMyTurn = currentLine?.character_id === selectedCharacter?.id;
 
-  // ─── Grabación con MediaRecorder + transcripción vía Lovable AI ───
+  // ─── Recording with MediaRecorder + IndexedDB storage + transcription ───
   const handleToggleRecording = async () => {
     if (!selectedCharacter || !currentLine) {
       toast.error("Selecciona personaje y línea antes de grabar.");
@@ -122,26 +131,57 @@ function Ensayo() {
 
     if (isRehearsing && recorderRef.current) {
       try {
-        setConnectionStatus("Procesando audio...");
+        setConnectionStatus("Guardando en IndexedDB...");
         setIsRehearsing(false);
-        const { audioBase64, mediaType } = await recorderRef.current.stop();
+        
+        // Get Blob (no Base64 encoding - instant! ⚡)
+        const { audioBlob, mediaType, durationMs } = await recorderRef.current.stop();
         recorderRef.current = null;
-        const { transcript } = await transcribe({
-          data: {
-            audioBase64,
-            mediaType,
-            referenceText: currentLine.text ?? undefined,
-          },
+
+        // Save Blob to IndexedDB (instant, no UI blocking)
+        const recordingId = await recordingService.saveRecording({
+          sessionId: latest?.id ?? 'unknown',
+          userId: 'current-user', // TODO: Get from auth context
+          audioBlob,
+          audioFormat: mediaType,
+          durationMs,
         });
+
+        setConnectionStatus("Enviando a transcripción...");
+
+        // Send Blob to backend via FormData (not Base64!)
+        const formData = new FormData();
+        formData.append('audioFile', audioBlob);
+        formData.append('mediaType', mediaType);
+        formData.append('referenceText', currentLine.text ?? '');
+
+        const { transcript } = await transcribe({
+          data: formData as any, // Sending FormData
+        });
+
+        // Update recording with transcript
+        await recordingService.updateRecording(recordingId, {
+          transcript,
+          synced: false, // Will be synced via sync service
+        });
+
+        // Add to sync queue for metadata sync
+        await recordingService.addToSyncQueue(recordingId, {
+          sessionId: latest?.id ?? 'unknown',
+          transcript,
+          duration_ms: durationMs,
+        });
+
         setLastTranscript(transcript);
         setConnectionStatus(`Transcripción línea ${activeLineIndex + 1}`);
-        toast.success("Audio transcrito");
+        toast.success("Audio guardado y transcrito ✨");
+        
         if (activeLineIndex < lines.length - 1) {
           setActiveLineIndex((prev) => prev + 1);
         }
       } catch (error) {
         console.error(error);
-        toast.error("Error al transcribir el audio.");
+        toast.error("Error al procesar el audio.");
         setConnectionStatus("Error en transcripción");
       }
     } else {

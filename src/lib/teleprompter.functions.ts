@@ -4,23 +4,41 @@ import { z } from "zod";
 import { createLovableAiGatewayProvider } from "./ai-gateway.server";
 
 const TranscribeInput = z.object({
-  audioBase64: z.string().min(1),
+  audioBlob: z.instanceof(Blob),
   mediaType: z.string().min(1).max(64),
   referenceText: z.string().max(2000).optional(),
 });
 
 export const transcribeAudio = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => TranscribeInput.parse(input))
+  .inputValidator((input: unknown) => {
+    // Handle FormData input from client
+    if (input instanceof FormData) {
+      const audioBlob = input.get('audioFile') as Blob | null;
+      const mediaType = input.get('mediaType') as string | null;
+      const referenceText = input.get('referenceText') as string | null;
+
+      if (!audioBlob || !mediaType) {
+        throw new Error("Missing audioFile or mediaType in FormData");
+      }
+
+      return {
+        audioBlob,
+        mediaType,
+        referenceText: referenceText || undefined,
+      };
+    }
+
+    return TranscribeInput.parse(input);
+  })
   .handler(async ({ data }) => {
     const key = process.env.LOVABLE_API_KEY;
     if (!key) {
       throw new Error("LOVABLE_API_KEY no configurada");
     }
 
-    // Decode base64 to bytes
-    const binary = atob(data.audioBase64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    // Convert Blob to bytes (no Base64 intermediate!)
+    const arrayBuffer = await data.audioBlob.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
 
     const gateway = createLovableAiGatewayProvider(key);
     const model = gateway("google/gemini-2.5-flash");

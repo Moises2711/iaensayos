@@ -1,7 +1,7 @@
 // Browser-only helpers for capturing microphone audio with MediaRecorder.
 
 export type RecorderHandle = {
-  stop: () => Promise<{ audioBase64: string; mediaType: string; durationMs: number }>;
+  stop: () => Promise<{ audioBlob: Blob; mediaType: string; durationMs: number }>;
   cancel: () => void;
 };
 
@@ -18,17 +18,6 @@ function pickMimeType(): string {
     }
   }
   return "audio/webm";
-}
-
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return btoa(binary);
 }
 
 export async function startMicRecording(): Promise<RecorderHandle> {
@@ -59,10 +48,9 @@ export async function startMicRecording(): Promise<RecorderHandle> {
           cleanup();
           if (cancelled) return;
           try {
-            const blob = new Blob(chunks, { type: mediaType });
-            const audioBase64 = await blobToBase64(blob);
+            const audioBlob = new Blob(chunks, { type: mediaType });
             resolve({
-              audioBase64,
+              audioBlob,
               mediaType: mediaType.split(";")[0],
               durationMs: Date.now() - startedAt,
             });
