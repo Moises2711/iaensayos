@@ -114,6 +114,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS trg_add_group_owner ON public.rehearsal_groups;
 CREATE TRIGGER trg_add_group_owner
   AFTER INSERT ON public.rehearsal_groups
   FOR EACH ROW EXECUTE FUNCTION public.add_group_owner_as_member();
