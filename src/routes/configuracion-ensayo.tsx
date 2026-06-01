@@ -347,26 +347,6 @@ function ConfigEnsayo() {
               </div>
             </Section>
 
-            <Section title="4. Opciones de IA">
-              <ToggleRow
-                label="Sugerir emociones"
-                desc="La IA sugerira emociones durante la escena."
-                on={emo}
-                onChange={setEmo}
-              />
-              <ToggleRow
-                label="Improvisacion"
-                desc="La IA puede improvisar lineas ocasionales."
-                on={improv}
-                onChange={setImprov}
-              />
-              <ToggleRow
-                label="Feedback al finalizar"
-                desc="La IA dara retroalimentacion al final."
-                on={feedback}
-                onChange={setFeedback}
-              />
-            </Section>
           </div>
         </div>
 
