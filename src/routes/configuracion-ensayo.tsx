@@ -396,9 +396,6 @@ function ConfigEnsayo() {
             {[
               ["Modo de ensayo", selectedMode.label],
               ["Dificultad de la IA", diff < 33 ? "Facil" : diff < 66 ? "Media" : "Avanzada"],
-              ["Sugerir emociones", emo ? "Si" : "No"],
-              ["Improvisacion", improv ? "Si" : "No"],
-              ["Feedback al finalizar", feedback ? "Si" : "No"],
             ].map(([key, value]) => (
               <div key={key} className="flex justify-between gap-2">
                 <dt className="text-muted-foreground">{key}</dt>
@@ -406,15 +403,6 @@ function ConfigEnsayo() {
               </div>
             ))}
           </dl>
-          <div className="rounded-lg bg-primary/10 border border-primary/20 p-3 text-xs flex gap-2">
-            <Sparkles className="w-4 h-4 text-primary shrink-0" />
-            <div>
-              <div className="text-primary">Listo para sincronizar tu ensayo.</div>
-              <div className="text-muted-foreground">
-                Transcripción en vivo con Lovable AI (sin backend externo).
-              </div>
-            </div>
-          </div>
         </aside>
       </div>
     </AppShell>
