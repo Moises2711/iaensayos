@@ -153,15 +153,15 @@ function Ensayo() {
         setConnectionStatus("Enviando a transcripción...");
 
         // Send Blob to backend via FormData (not Base64!)
-        // 1. Convertimos el audio a texto (Base64) usando una Promesa
+        // 1. Convertimos el audio a texto (Base64) 
         const base64Audio = await new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.readAsDataURL(audioBlob);
           reader.onloadend = () => resolve(reader.result as string);
         });
 
-        // 2. Lo enviamos como un objeto normal (¡Adiós FormData en el frontend!)
-        const { transcript } = await transcribeAudio({ // Asegúrate de que el nombre coincida con tu importación
+        // 2. Lo enviamos como un objeto normal 
+        const { transcript } = await transcribeAudio({ // Asegúrar de que el nombre coincida con tu importación
           data: {
           audioBase64: base64Audio,
           sessionId: currentSessionId,
