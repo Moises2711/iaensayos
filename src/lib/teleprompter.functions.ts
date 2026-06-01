@@ -1,10 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 
-/**
- * Transcripción simulada (mock) para pruebas sin costo en la API de OpenAI/Whisper.
- * La llamada real a Whisper está comentada más abajo. Para reactivarla, descomentar
- * el bloque y eliminar el return simulado.
- */
 export const transcribeAudio = createServerFn({
   method: "POST",
 })
@@ -16,19 +11,12 @@ export const transcribeAudio = createServerFn({
     const sessionId = formData.get("sessionId") as string | null;
     if (!sessionId) throw new Error("sessionId required");
 
-    // --- MOCK TEMPORAL (sin costo de API) ---
-    return {
-      transcript: "Esta es una transcripción simulada desde Lovable.",
-      confidence: 0.99,
-    };
-
-    // --- Llamada real a Whisper (comentada temporalmente) ---
-    /*
     const audioFile = formData.get("audioFile") as File | null;
     const referenceText = formData.get("referenceText") as string | null;
 
     if (!audioFile) throw new Error("audioFile required");
 
+    // Llama a tu llave de OpenAI. ¡Asegúrate de tener la nueva en tu .env!
     const openAiKey = process.env.OPENAI_API_KEY;
     if (!openAiKey) {
       throw new Error("OPENAI_API_KEY no configurada");
@@ -38,6 +26,8 @@ export const transcribeAudio = createServerFn({
     payload.append("file", audioFile);
     payload.append("model", "whisper-1");
     payload.append("language", "es");
+    
+    // Le pasamos el texto original como "pista" para que Whisper sea más preciso
     if (referenceText && referenceText.trim().length > 0) {
       payload.append("prompt", `Hint: "${referenceText}"`);
     }
@@ -55,6 +45,6 @@ export const transcribeAudio = createServerFn({
 
     const data = (await response.json()) as { text?: string };
     const transcript = data.text?.trim() ?? "";
+    
     return { transcript, confidence: 0.95 };
-    */
   });
