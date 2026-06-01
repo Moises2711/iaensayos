@@ -13,7 +13,7 @@ import {
   Users,
   BookOpen,
   Info,
-  Sparkles,
+  
   Drama,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
