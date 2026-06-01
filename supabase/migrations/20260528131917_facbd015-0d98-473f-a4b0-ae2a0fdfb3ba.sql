@@ -1,5 +1,5 @@
 -- Profiles table
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT,
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS public.characters (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.script_lines (
+CREATE TABLE IF NOT EXISTS public.script_lines (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   scene_id UUID NOT NULL REFERENCES public.scenes(id) ON DELETE CASCADE,
   character_id UUID REFERENCES public.characters(id) ON DELETE SET NULL,
@@ -95,7 +95,7 @@ CREATE TABLE public.script_lines (
   UNIQUE (scene_id, line_order)
 );
 
-CREATE TABLE public.rehearsal_sessions (
+CREATE TABLE IF NOT EXISTS public.rehearsal_sessions (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   script_id UUID REFERENCES public.scripts(id) ON DELETE SET NULL,
@@ -126,7 +126,7 @@ CREATE TABLE public.rehearsal_sessions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.rehearsal_highlights (
+CREATE TABLE IF NOT EXISTS public.rehearsal_highlights (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   session_id UUID NOT NULL REFERENCES public.rehearsal_sessions(id) ON DELETE CASCADE,
   event_time TEXT NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE public.rehearsal_highlights (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.perfil_usuario (
+CREATE TABLE IF NOT EXISTS public.perfil_usuario (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT,
   email TEXT,
@@ -153,7 +153,7 @@ CREATE TABLE public.perfil_usuario (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.teleprompter_recordings (
+CREATE TABLE IF NOT EXISTS public.teleprompter_recordings (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   rehearsal_session_id UUID NOT NULL REFERENCES public.rehearsal_sessions(id) ON DELETE CASCADE,

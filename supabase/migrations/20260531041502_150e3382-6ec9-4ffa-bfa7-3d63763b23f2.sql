@@ -1,5 +1,5 @@
 -- 1. Tabla de grupos
-CREATE TABLE public.rehearsal_groups (
+CREATE TABLE IF NOT EXISTS public.rehearsal_groups (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL CHECK (length(name) BETWEEN 1 AND 120),
   description text,
@@ -15,7 +15,7 @@ GRANT ALL ON public.rehearsal_groups TO service_role;
 ALTER TABLE public.rehearsal_groups ENABLE ROW LEVEL SECURITY;
 
 -- 2. Tabla de miembros
-CREATE TABLE public.rehearsal_group_members (
+CREATE TABLE IF NOT EXISTS public.rehearsal_group_members (
   group_id  uuid NOT NULL REFERENCES public.rehearsal_groups(id) ON DELETE CASCADE,
   user_id   uuid NOT NULL,
   role      text NOT NULL DEFAULT 'member' CHECK (role IN ('owner','member')),
