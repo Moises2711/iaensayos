@@ -58,9 +58,7 @@ function Index() {
               <br />
               con <span className="text-gradient-primary italic">IA</span>
             </h1>
-            <p className="text-muted-foreground max-w-md mb-8">
-              Practica escenas, interpreta personajes y deja que la IA complete los demas papeles.
-            </p>
+            <div className="mb-8" />
             <Link
               to="/ensayo"
               className="inline-flex items-center gap-2 bg-primary-gradient text-primary-foreground font-medium px-6 py-3 rounded-xl shadow-glow hover:scale-[1.02] transition"

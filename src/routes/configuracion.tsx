@@ -4,8 +4,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
-import { Mic, Volume2, Bell, Shield, Download, Save, User } from "lucide-react";
+import { Mic, Volume2, Bell, Shield, Download, Save, User, Palette, RotateCcw } from "lucide-react";
 import { getPerfilUsuario, updatePerfilUsuario } from "@/lib/rehearsal-data";
+import { useThemeColors } from "@/lib/theme-colors";
 
 export const Route = createFileRoute("/configuracion")({
   component: Configuracion,
@@ -37,6 +38,7 @@ function Configuracion() {
   const [notifications, setNotifications] = useState(true);
   const [offline, setOffline] = useState(false);
   const [privacy, setPrivacy] = useState("privado");
+  const { colors: themeColors, update: updateThemeColors, reset: resetThemeColors } = useThemeColors();
 
   useEffect(() => {
     if (!profile) return;
@@ -196,6 +198,51 @@ function Configuracion() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="bg-card border border-border/60 rounded-xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-full border border-primary/30 bg-primary/5 grid place-items-center text-primary">
+                  <Palette className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-medium">Apariencia</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Personaliza el color del texto y el fondo de la app.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-2 text-xs text-muted-foreground">
+                  Color de letra
+                  <span className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={themeColors.foreground}
+                      onChange={(e) => updateThemeColors({ foreground: e.target.value })}
+                      className="h-9 w-12 rounded-md border border-border/60 bg-surface cursor-pointer"
+                    />
+                    <span className="font-mono text-xs text-foreground">{themeColors.foreground}</span>
+                  </span>
+                </label>
+                <label className="flex flex-col gap-2 text-xs text-muted-foreground">
+                  Color de fondo
+                  <span className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={themeColors.background}
+                      onChange={(e) => updateThemeColors({ background: e.target.value })}
+                      className="h-9 w-12 rounded-md border border-border/60 bg-surface cursor-pointer"
+                    />
+                    <span className="font-mono text-xs text-foreground">{themeColors.background}</span>
+                  </span>
+                </label>
+              </div>
+              <button
+                onClick={resetThemeColors}
+                className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-primary"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Restablecer colores
+              </button>
             </div>
           </section>
         </div>

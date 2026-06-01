@@ -267,18 +267,6 @@ function Ensayo() {
             </div>
           </div>
         </div>
-        <div className="text-xs leading-relaxed">
-          <div className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase mb-0.5">
-            Modo
-          </div>
-          <div>
-            Realismo:{" "}
-            <span className="text-primary">{difficultyLabel(latest?.ai_difficulty ?? 50)}</span>
-          </div>
-          <div>
-            Ritmo: <span className="text-primary">{modeLabel(latest?.mode ?? "individual")}</span>
-          </div>
-        </div>
         <button
           type="button"
           onClick={handleFinalizar}

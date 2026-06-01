@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { useApplyStoredThemeColors } from "@/lib/theme-colors";
 
 function NotFoundComponent() {
   return (
@@ -118,6 +119,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useApplyStoredThemeColors();
 
   return (
     <QueryClientProvider client={queryClient}>
