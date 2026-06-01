@@ -7,7 +7,6 @@ import { createServerFn } from "@tanstack/react-start";
  */
 export const transcribeAudio = createServerFn({
   method: "POST",
-  validateInput: false,
 })
   .handler(async (formData: unknown) => {
     if (!(formData instanceof FormData)) {
