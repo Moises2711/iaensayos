@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { useApplyStoredThemeColors } from "@/lib/theme-colors";
 
 function NotFoundComponent() {
   return (
