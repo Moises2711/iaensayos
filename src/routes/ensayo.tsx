@@ -162,9 +162,11 @@ function Ensayo() {
 
         // 2. Lo enviamos como un objeto normal (¡Adiós FormData en el frontend!)
         const { transcript } = await transcribeAudio({ // Asegúrate de que el nombre coincida con tu importación
+          data: {
           audioBase64: base64Audio,
           sessionId: currentSessionId,
           referenceText: currentLine.text ?? ''
+          }
         }as any);
 
         // Update recording with transcript
