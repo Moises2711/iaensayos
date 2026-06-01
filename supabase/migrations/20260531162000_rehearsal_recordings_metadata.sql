@@ -31,6 +31,7 @@ CREATE INDEX IF NOT EXISTS idx_rehearsal_recordings_metadata_user_id
 CREATE INDEX IF NOT EXISTS idx_rehearsal_recordings_metadata_created_at
   ON public.rehearsal_recordings_metadata(created_at DESC);
 
+ALTER TABLE public.scripts ADD COLUMN IF NOT EXISTS status TEXT;
 CREATE INDEX IF NOT EXISTS idx_scripts_user_id_status
   ON public.scripts(user_id, status)
   WHERE deleted_at IS NULL;
