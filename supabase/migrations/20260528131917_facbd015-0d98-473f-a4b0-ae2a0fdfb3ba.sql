@@ -42,7 +42,7 @@ FOR EACH ROW
 EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Core rehearsal data tables
-CREATE TABLE public.scripts (
+CREATE TABLE IF NOT EXISTS public.scripts (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
