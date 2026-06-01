@@ -153,13 +153,19 @@ function Ensayo() {
         setConnectionStatus("Enviando a transcripción...");
 
         // Send Blob to backend via FormData (not Base64!)
-        const formData = new FormData();
-        formData.append('audioFile', audioBlob, 'grabacion.webm');
-        formData.append('mediaType', mediaType);
-        formData.append('sessionId', currentSessionId);
-        formData.append('referenceText', currentLine.text ?? '');
+        // 1. Convertimos el audio a texto (Base64) usando una Promesa
+        const base64Audio = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(audioBlob);
+          reader.onloadend = () => resolve(reader.result as string);
+        });
 
-        const { transcript } = await transcribe(formData as any);
+        // 2. Lo enviamos como un objeto normal (¡Adiós FormData en el frontend!)
+        const { transcript } = await transcribeAudio({ // Asegúrate de que el nombre coincida con tu importación
+          audioBase64: base64Audio,
+          sessionId: currentSessionId,
+          referenceText: currentLine.text ?? ''
+        }as any);
 
         // Update recording with transcript
         await recordingService.updateRecording(recordingId, {
