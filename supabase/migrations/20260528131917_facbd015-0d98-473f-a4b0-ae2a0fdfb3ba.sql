@@ -427,7 +427,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE public.rehearsal_highlights 
-ADD COLUMN IF NOT EXISTS event_time NUMERIC,
+ADD COLUMN IF NOT EXISTS event_time TEXT,
 ADD COLUMN IF NOT EXISTS note TEXT,
 ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 INSERT INTO public.rehearsal_highlights (id, session_id, event_time, note, sort_order)
