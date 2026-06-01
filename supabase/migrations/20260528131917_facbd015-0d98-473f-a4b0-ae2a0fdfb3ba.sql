@@ -410,6 +410,15 @@ VALUES
   ('00000000-0000-4000-8000-000000000508', '00000000-0000-4000-8000-000000000203', '00000000-0000-4000-8000-000000000305', 2, 'Tu tristeza nubla la sala, Hamlet.', 'Responder con cautela.', 4)
 ON CONFLICT (id) DO NOTHING;
 
+ALTER TABLE public.rehearsal_sessions 
+ADD COLUMN IF NOT EXISTS repeated_lines INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS skipped_lines INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS clarity_score INTEGER,
+ADD COLUMN IF NOT EXISTS expression_score INTEGER,
+ADD COLUMN IF NOT EXISTS rhythm_score INTEGER,
+ADD COLUMN IF NOT EXISTS projection_score INTEGER,
+ADD COLUMN IF NOT EXISTS memorization_score INTEGER,
+ADD COLUMN IF NOT EXISTS feedback_summary TEXT;
 INSERT INTO public.rehearsal_sessions (id, script_id, scene_id, selected_character_id, score, mode, ai_difficulty, suggest_emotions, allow_improv, feedback_enabled, completed_lines, total_lines, repeated_lines, skipped_lines, clarity_score, expression_score, rhythm_score, projection_score, memorization_score, feedback_summary, started_at, ended_at, updated_at)
 VALUES
   ('00000000-0000-4000-8000-000000000401', '00000000-0000-4000-8000-000000000101', '00000000-0000-4000-8000-000000000202', '00000000-0000-4000-8000-000000000301', 87, 'individual', 72, true, true, true, 18, 18, 2, 0, 90, 85, 82, 88, 89, 'Mostraste gran conexion emocional y un ritmo consistente. Sigue practicando la pausa antes de responder.', now() - interval '2 days 35 minutes', now() - interval '2 days', now() - interval '2 days'),
