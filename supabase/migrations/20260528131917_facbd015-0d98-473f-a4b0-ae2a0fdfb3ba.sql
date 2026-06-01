@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS public.scenes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE public.characters (
+CREATE TABLE IF NOT EXISTS public.characters (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   script_id UUID NOT NULL REFERENCES public.scripts(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
