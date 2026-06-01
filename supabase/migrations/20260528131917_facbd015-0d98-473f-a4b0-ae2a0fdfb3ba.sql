@@ -426,6 +426,10 @@ VALUES
   ('00000000-0000-4000-8000-000000000403', '00000000-0000-4000-8000-000000000101', '00000000-0000-4000-8000-000000000201', '00000000-0000-4000-8000-000000000301', 79, 'lectura', 55, false, true, false, 12, 15, 3, 0, 79, 76, 81, 78, 80, 'La lectura fue estable; conviene reforzar proyeccion y memorizacion.', now() - interval '4 days 20 minutes', now() - interval '4 days', now() - interval '4 days')
 ON CONFLICT (id) DO NOTHING;
 
+ALTER TABLE public.rehearsal_highlights 
+ADD COLUMN IF NOT EXISTS event_time NUMERIC,
+ADD COLUMN IF NOT EXISTS note TEXT,
+ADD COLUMN IF NOT EXISTS sort_order INTEGER DEFAULT 0;
 INSERT INTO public.rehearsal_highlights (id, session_id, event_time, note, sort_order)
 VALUES
   ('00000000-0000-4000-8000-000000000601', '00000000-0000-4000-8000-000000000401', '00:04:32', 'Excelente proyeccion de voz', 1),
