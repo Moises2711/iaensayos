@@ -312,7 +312,7 @@ CREATE POLICY "Users manage highlights for own sessions" ON public.rehearsal_hig
 );
 
 -- Policies: perfil_usuario
-CREATE POLICY "Users can read own perfil_usuario" ON public.perfil_usuario FOR SELECT TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "Users can read own perfil_usuario" ON public.perfil_usuario FOR SELECT TO authenticated USING (auth.uid() = id);
 CREATE POLICY "Users can insert own perfil_usuario" ON public.perfil_usuario FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own perfil_usuario" ON public.perfil_usuario FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
