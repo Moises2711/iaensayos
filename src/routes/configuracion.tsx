@@ -38,6 +38,7 @@ function Configuracion() {
   const [notifications, setNotifications] = useState(true);
   const [offline, setOffline] = useState(false);
   const [privacy, setPrivacy] = useState("privado");
+  const { colors: themeColors, update: updateThemeColors, reset: resetThemeColors } = useThemeColors();
 
   useEffect(() => {
     if (!profile) return;
