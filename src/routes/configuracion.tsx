@@ -4,8 +4,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
-import { Mic, Volume2, Bell, Shield, Download, Save, User } from "lucide-react";
+import { Mic, Volume2, Bell, Shield, Download, Save, User, Palette, RotateCcw } from "lucide-react";
 import { getPerfilUsuario, updatePerfilUsuario } from "@/lib/rehearsal-data";
+import { useThemeColors } from "@/lib/theme-colors";
 
 export const Route = createFileRoute("/configuracion")({
   component: Configuracion,
