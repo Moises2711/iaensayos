@@ -85,7 +85,7 @@ CREATE TRIGGER trg_rehearsal_groups_updated_at
 
 -- 7. Vincular libretos a grupos
 ALTER TABLE public.scripts
-  ADD COLUMN group_id uuid REFERENCES public.rehearsal_groups(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS group_id uuid REFERENCES public.rehearsal_groups(id) ON DELETE SET NULL;
 
 CREATE INDEX idx_scripts_group_id ON public.scripts(group_id) WHERE group_id IS NOT NULL;
 
