@@ -328,7 +328,7 @@ export async function syncRecordingMetadata(input: {
       latest_confidence: input.confidence,
       recordings_count: await getRecordingCount(input.sessionId),
       updated_at: new Date().toISOString(),
-    })
+    } as any)
     .eq("id", input.sessionId)
     .eq("user_id", user.id);
 
