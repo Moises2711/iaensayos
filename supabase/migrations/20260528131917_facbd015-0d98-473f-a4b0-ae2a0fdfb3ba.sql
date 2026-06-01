@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS public.rehearsal_highlights (
 );
 
 CREATE TABLE IF NOT EXISTS public.perfil_usuario (
-  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT,
   email TEXT,
   avatar_url TEXT,
