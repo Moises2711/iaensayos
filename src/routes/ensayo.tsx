@@ -154,14 +154,12 @@ function Ensayo() {
 
         // Send Blob to backend via FormData (not Base64!)
         const formData = new FormData();
-        formData.append('audioFile', audioBlob);
+        formData.append('audioFile', audioBlob, 'grabacion.webm');
         formData.append('mediaType', mediaType);
         formData.append('sessionId', currentSessionId);
         formData.append('referenceText', currentLine.text ?? '');
 
-        const { transcript } = await transcribe({
-          data: formData as any, // Sending FormData
-        });
+        const { transcript } = await transcribe(formData as any);
 
         // Update recording with transcript
         await recordingService.updateRecording(recordingId, {
