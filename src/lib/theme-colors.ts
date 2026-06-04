@@ -3,14 +3,84 @@ import { useEffect, useState } from "react";
 const STORAGE_KEY = "ia-ensayos:theme-colors";
 
 export type ThemeColors = {
-  foreground: string; // CSS color
-  background: string; // CSS color
+  foreground: string;
+  background: string;
+  primary: string;
+  primaryGlow: string;
+  paletteId?: string;
 };
 
-export const DEFAULT_THEME_COLORS: ThemeColors = {
-  foreground: "#f4ece0",
-  background: "#1a1410",
+export type PalettePreset = {
+  id: string;
+  label: string;
+  swatch: string[];
+  colors: ThemeColors;
 };
+
+export const PALETTES: PalettePreset[] = [
+  {
+    id: "amber",
+    label: "Ámbar (Default)",
+    swatch: ["#1a1410", "#f4ece0", "#e0a44a", "#f0c070"],
+    colors: {
+      paletteId: "amber",
+      background: "#1a1410",
+      foreground: "#f4ece0",
+      primary: "#e0a44a",
+      primaryGlow: "#f0c070",
+    },
+  },
+  {
+    id: "indigo",
+    label: "Índigo nocturno",
+    swatch: ["#0f1024", "#e8e9ff", "#7c83ff", "#a4a8ff"],
+    colors: {
+      paletteId: "indigo",
+      background: "#0f1024",
+      foreground: "#e8e9ff",
+      primary: "#7c83ff",
+      primaryGlow: "#a4a8ff",
+    },
+  },
+  {
+    id: "emerald",
+    label: "Esmeralda",
+    swatch: ["#0d1a14", "#e6f5ec", "#3fbf7f", "#6ed79c"],
+    colors: {
+      paletteId: "emerald",
+      background: "#0d1a14",
+      foreground: "#e6f5ec",
+      primary: "#3fbf7f",
+      primaryGlow: "#6ed79c",
+    },
+  },
+  {
+    id: "rose",
+    label: "Rosa escenario",
+    swatch: ["#1a0f14", "#fde8ef", "#ec4f80", "#f47aa1"],
+    colors: {
+      paletteId: "rose",
+      background: "#1a0f14",
+      foreground: "#fde8ef",
+      primary: "#ec4f80",
+      primaryGlow: "#f47aa1",
+    },
+  },
+  {
+    id: "slate",
+    label: "Slate minimal",
+    swatch: ["#f8f9fb", "#0f172a", "#3b82f6", "#60a5fa"],
+    colors: {
+      paletteId: "slate",
+      background: "#f8f9fb",
+      foreground: "#0f172a",
+      primary: "#3b82f6",
+      primaryGlow: "#60a5fa",
+    },
+  },
+];
+
+export const DEFAULT_THEME_COLORS: ThemeColors = PALETTES[0].colors;
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -23,8 +93,8 @@ export function loadThemeColors(): ThemeColors {
     if (!raw) return DEFAULT_THEME_COLORS;
     const parsed = JSON.parse(raw) as Partial<ThemeColors>;
     return {
-      foreground: parsed.foreground ?? DEFAULT_THEME_COLORS.foreground,
-      background: parsed.background ?? DEFAULT_THEME_COLORS.background,
+      ...DEFAULT_THEME_COLORS,
+      ...parsed,
     };
   } catch {
     return DEFAULT_THEME_COLORS;
@@ -38,6 +108,9 @@ export function applyThemeColors(colors: ThemeColors) {
   root.style.setProperty("--card-foreground", colors.foreground);
   root.style.setProperty("--popover-foreground", colors.foreground);
   root.style.setProperty("--background", colors.background);
+  root.style.setProperty("--primary", colors.primary);
+  root.style.setProperty("--primary-glow", colors.primaryGlow);
+  root.style.setProperty("--ring", colors.primary);
 }
 
 export function saveThemeColors(colors: ThemeColors) {
@@ -46,14 +119,12 @@ export function saveThemeColors(colors: ThemeColors) {
   applyThemeColors(colors);
 }
 
-/** Mount once at the app root to hydrate persisted colors. */
 export function useApplyStoredThemeColors() {
   useEffect(() => {
     applyThemeColors(loadThemeColors());
   }, []);
 }
 
-/** Stateful hook for color pickers. */
 export function useThemeColors() {
   const [colors, setColors] = useState<ThemeColors>(DEFAULT_THEME_COLORS);
 
@@ -65,10 +136,17 @@ export function useThemeColors() {
 
   const update = (patch: Partial<ThemeColors>) => {
     setColors((prev) => {
-      const next = { ...prev, ...patch };
+      const next = { ...prev, ...patch, paletteId: patch.paletteId ?? undefined };
       saveThemeColors(next);
       return next;
     });
+  };
+
+  const applyPalette = (paletteId: string) => {
+    const preset = PALETTES.find((p) => p.id === paletteId);
+    if (!preset) return;
+    setColors(preset.colors);
+    saveThemeColors(preset.colors);
   };
 
   const reset = () => {
@@ -76,5 +154,5 @@ export function useThemeColors() {
     saveThemeColors(DEFAULT_THEME_COLORS);
   };
 
-  return { colors, update, reset };
+  return { colors, update, applyPalette, reset };
 }
