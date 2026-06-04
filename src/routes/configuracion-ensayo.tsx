@@ -62,7 +62,7 @@ function ConfigEnsayo() {
   const [selectedSceneId, setSelectedSceneId] = useState("");
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [mode, setMode] = useState("individual");
-  const [diff, setDiff] = useState(50);
+  const [selectedRecordings, setSelectedRecordings] = useState<Record<string, string>>({});
   const [emo, setEmo] = useState(true);
   const [improv, setImprov] = useState(true);
   const [feedback, setFeedback] = useState(false);
@@ -85,7 +85,6 @@ function ConfigEnsayo() {
     const profile = profileData?.profile;
     if (!profile) return;
     setMode(profile.rehearsal_mode);
-    setDiff(profile.ai_difficulty);
     setEmo(profile.suggest_emotions);
     setImprov(profile.allow_improv);
     setFeedback(profile.feedback_enabled);
@@ -120,7 +119,6 @@ function ConfigEnsayo() {
     mutationFn: () =>
       updatePerfilUsuario({
         rehearsal_mode: mode,
-        ai_difficulty: diff,
         suggest_emotions: emo,
         allow_improv: improv,
         feedback_enabled: feedback,
@@ -150,7 +148,7 @@ function ConfigEnsayo() {
         sceneId: setup.scene.id,
         selectedCharacterId: selectedCharacter.id,
         mode,
-        aiDifficulty: diff,
+        aiDifficulty: 50,
         suggestEmotions: emo,
         allowImprov: improv,
         feedbackEnabled: feedback,
