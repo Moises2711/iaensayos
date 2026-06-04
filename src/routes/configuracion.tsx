@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { TopBar } from "@/components/TopBar";
 import { Mic, Volume2, Bell, Shield, Download, Save, User, Palette, RotateCcw } from "lucide-react";
 import { getPerfilUsuario, updatePerfilUsuario } from "@/lib/rehearsal-data";
-import { useThemeColors } from "@/lib/theme-colors";
+import { useThemeColors, PALETTES } from "@/lib/theme-colors";
 
 export const Route = createFileRoute("/configuracion")({
   component: Configuracion,
@@ -34,18 +34,16 @@ function Configuracion() {
   const [displayName, setDisplayName] = useState("");
   const [preferredVoice, setPreferredVoice] = useState(VOICES[0]);
   const [mode, setMode] = useState("individual");
-  const [difficulty, setDifficulty] = useState(50);
   const [notifications, setNotifications] = useState(true);
   const [offline, setOffline] = useState(false);
   const [privacy, setPrivacy] = useState("privado");
-  const { colors: themeColors, update: updateThemeColors, reset: resetThemeColors } = useThemeColors();
+  const { colors: themeColors, update: updateThemeColors, applyPalette, reset: resetThemeColors } = useThemeColors();
 
   useEffect(() => {
     if (!profile) return;
     setDisplayName(profile.display_name ?? "");
     setPreferredVoice(profile.preferred_voice);
     setMode(profile.rehearsal_mode);
-    setDifficulty(profile.ai_difficulty);
     setNotifications(profile.notifications_enabled);
     setOffline(profile.offline_mode_enabled);
     setPrivacy(profile.privacy_level);
@@ -57,7 +55,6 @@ function Configuracion() {
         display_name: displayName,
         preferred_voice: preferredVoice,
         rehearsal_mode: mode,
-        ai_difficulty: difficulty,
         notifications_enabled: notifications,
         offline_mode_enabled: offline,
         privacy_level: privacy,
@@ -138,20 +135,6 @@ function Configuracion() {
                 value={mode}
                 options={MODES}
                 onChange={setMode}
-              />
-            </div>
-            <div className="mt-5">
-              <div className="flex items-center justify-between text-xs mb-2">
-                <span className="text-muted-foreground">Dificultad IA</span>
-                <span className="text-primary">{difficulty}%</span>
-              </div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={difficulty}
-                onChange={(event) => setDifficulty(Number(event.target.value))}
-                className="w-full accent-primary"
               />
             </div>
           </section>
