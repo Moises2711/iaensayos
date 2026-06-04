@@ -21,10 +21,12 @@ import { TopBar } from "@/components/TopBar";
 import {
   createRehearsalSession,
   getPerfilUsuario,
+  getRecordingsForCharacters,
   getScriptSetup,
   getScripts,
   updatePerfilUsuario,
   updateRehearsalSession,
+  type TeleprompterRecordingRecord,
 } from "@/lib/rehearsal-data";
 
 
@@ -35,7 +37,7 @@ export const Route = createFileRoute("/configuracion-ensayo")({
 });
 
 const MODES = [
-  { icon: User, value: "individual", label: "Individual", desc: "Ensaya solo con IA." },
+  { icon: User, value: "individual", label: "Individual", desc: "Ensaya solo." },
   { icon: Users, value: "grupo", label: "En grupo", desc: "Con otros actores." },
   { icon: BookOpen, value: "lectura", label: "Lectura", desc: "Lectura sin actuacion." },
 ] as const;
