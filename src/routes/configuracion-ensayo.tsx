@@ -493,3 +493,97 @@ function ToggleRow({
     </div>
   );
 }
+
+function VoicePersonalizationSection({
+  characters,
+  selectedRecordings,
+  onSelect,
+}: {
+  characters: { id: string; name: string }[];
+  selectedRecordings: Record<string, string>;
+  onSelect: (characterName: string, recordingId: string) => void;
+}) {
+  const names = characters.map((c) => c.name);
+  const { data: recordingsMap = {}, isLoading } = useQuery({
+    queryKey: ["character-recordings", names.sort().join("|")],
+    queryFn: () => getRecordingsForCharacters(names),
+    enabled: names.length > 0,
+  });
+
+  const playRecording = (rec: TeleprompterRecordingRecord) => {
+    if (!rec.audio_url) {
+      toast.info("Esta grabación no tiene audio almacenado.");
+      return;
+    }
+    try {
+      const audio = new Audio(rec.audio_url);
+      audio.play();
+    } catch {
+      toast.error("No se pudo reproducir la grabación.");
+    }
+  };
+
+  return (
+    <Section
+      title="4. Personalización de voz"
+      subtitle="Elige una grabación previa para reemplazar la voz de cada personaje."
+    >
+      {isLoading && (
+        <p className="text-xs text-muted-foreground">Cargando grabaciones...</p>
+      )}
+      {!isLoading && characters.length === 0 && (
+        <p className="text-xs text-muted-foreground">Selecciona un libreto con personajes.</p>
+      )}
+      <div className="space-y-3">
+        {characters.map((character) => {
+          const recs = recordingsMap[character.name] ?? [];
+          const selected = selectedRecordings[character.name] ?? "";
+          return (
+            <div
+              key={character.id}
+              className="grid grid-cols-[auto_1fr_auto] gap-3 items-center border border-border/40 rounded-lg p-3 bg-surface/60"
+            >
+              <div className="w-9 h-9 rounded-full bg-primary/15 grid place-items-center text-primary text-sm font-semibold">
+                {character.name?.[0] || "?"}
+              </div>
+              <div>
+                <div className="text-sm">{character.name}</div>
+                {recs.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Sin grabaciones disponibles.
+                  </p>
+                ) : (
+                  <select
+                    value={selected}
+                    onChange={(e) => onSelect(character.name, e.target.value)}
+                    className="mt-1 w-full bg-background border border-border/60 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-primary/50"
+                  >
+                    <option value="">Voz por defecto</option>
+                    {recs.map((rec) => (
+                      <option key={rec.id} value={rec.id}>
+                        Grabación {new Date(rec.created_at).toLocaleString()}
+                        {rec.duration_sec ? ` · ${Math.round(Number(rec.duration_sec))}s` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {selected && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rec = recs.find((r) => r.id === selected);
+                    if (rec) playRecording(rec);
+                  }}
+                  className="text-xs px-2.5 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10"
+                >
+                  ▶
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Section>
+  );
+}
