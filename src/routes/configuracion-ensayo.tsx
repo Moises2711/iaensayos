@@ -363,11 +363,11 @@ function ConfigEnsayo() {
                   {character.name?.[0] || "?"}
                 </div>
                 <span className="flex-1">{character.name}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded ${character.id === selectedCharacter?.id ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}
-                >
-                  {character.id === selectedCharacter?.id ? "Tu" : "IA"}
-                </span>
+                {character.id === selectedCharacter?.id && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
+                    Tu
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -377,15 +377,10 @@ function ConfigEnsayo() {
 
           <p className="text-[10px] tracking-[0.25em] text-muted-foreground mb-2">CONFIGURACION</p>
           <dl className="text-xs space-y-1.5 mb-5">
-            {[
-              ["Modo de ensayo", selectedMode.label],
-              ["Dificultad de la IA", diff < 33 ? "Facil" : diff < 66 ? "Media" : "Avanzada"],
-            ].map(([key, value]) => (
-              <div key={key} className="flex justify-between gap-2">
-                <dt className="text-muted-foreground">{key}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
+            <div className="flex justify-between gap-2">
+              <dt className="text-muted-foreground">Modo de ensayo</dt>
+              <dd>{selectedMode.label}</dd>
+            </div>
           </dl>
         </aside>
       </div>
