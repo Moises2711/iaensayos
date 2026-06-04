@@ -194,6 +194,38 @@ function Configuracion() {
                   </p>
                 </div>
               </div>
+              <div className="mb-4">
+                <p className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase mb-2">
+                  Paletas predefinidas
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {PALETTES.map((palette) => {
+                    const active = themeColors.paletteId === palette.id;
+                    return (
+                      <button
+                        key={palette.id}
+                        onClick={() => applyPalette(palette.id)}
+                        className={`rounded-lg border p-2 text-left transition ${
+                          active
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-surface hover:border-primary/40"
+                        }`}
+                      >
+                        <div className="flex gap-1 mb-1.5">
+                          {palette.swatch.map((c, i) => (
+                            <span
+                              key={i}
+                              className="w-4 h-4 rounded-full border border-border/40"
+                              style={{ backgroundColor: c }}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs">{palette.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <label className="flex flex-col gap-2 text-xs text-muted-foreground">
                   Color de letra
@@ -217,6 +249,18 @@ function Configuracion() {
                       className="h-9 w-12 rounded-md border border-border/60 bg-surface cursor-pointer"
                     />
                     <span className="font-mono text-xs text-foreground">{themeColors.background}</span>
+                  </span>
+                </label>
+                <label className="flex flex-col gap-2 text-xs text-muted-foreground">
+                  Color principal
+                  <span className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={themeColors.primary}
+                      onChange={(e) => updateThemeColors({ primary: e.target.value })}
+                      className="h-9 w-12 rounded-md border border-border/60 bg-surface cursor-pointer"
+                    />
+                    <span className="font-mono text-xs text-foreground">{themeColors.primary}</span>
                   </span>
                 </label>
               </div>
