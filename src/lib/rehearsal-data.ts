@@ -913,6 +913,29 @@ export async function createTeleprompterRecording(
   return data;
 }
 
+export async function getRecordingsForCharacters(
+  characterNames: string[],
+): Promise<Record<string, TeleprompterRecordingRecord[]>> {
+  const user = await getCurrentUser();
+  if (!user || characterNames.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("teleprompter_recordings")
+    .select("*")
+    .eq("user_id", user.id)
+    .in("character_name", characterNames)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  const grouped: Record<string, TeleprompterRecordingRecord[]> = {};
+  for (const rec of data ?? []) {
+    if (!grouped[rec.character_name]) grouped[rec.character_name] = [];
+    grouped[rec.character_name].push(rec);
+  }
+  return grouped;
+}
+
 export async function getRecentRehearsals(limit = 3): Promise<RehearsalSummary[]> {
   const { data, error } = await supabase
     .from("rehearsal_sessions")

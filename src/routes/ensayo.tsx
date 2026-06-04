@@ -339,7 +339,7 @@ function Ensayo() {
                 <CharRow
                   key={character.id}
                   icon={character.id === selectedCharacter?.id ? Crown : Drama}
-                  name={`${character.name}${character.id === selectedCharacter?.id ? " (Tu)" : " (IA)"}`}
+                  name={character.name}
                   status={character.id === currentLine?.character_id ? "Activo" : "En espera"}
                   muted={character.id === selectedCharacter?.id}
                   playing={isRehearsing && character.id === currentLine?.character_id}
@@ -350,7 +350,7 @@ function Ensayo() {
 
           <Card title="Teleprompter en vivo">
             <Quick label="Sesion FastAPI" value={teleprompterSessionId ? "Conectado" : "Desconectado"} />
-            <Quick label="Turno actual" value={isMyTurn ? "Tu turno" : "IA / escucha"} />
+            <Quick label="Turno actual" value={isMyTurn ? "Tu turno" : "Escucha"} />
             <div className="mt-3 rounded-lg border border-border/60 bg-surface p-3">
               <div className="text-[10px] tracking-[0.2em] text-muted-foreground uppercase mb-1">
                 Estado
@@ -413,7 +413,7 @@ function LineCard({
           <>
             <div className="flex items-center gap-2 mb-2">
               <span className={`text-sm font-semibold ${tone}`}>
-                {line.character?.name.toUpperCase() ?? "NARRADOR"} {isUserLine ? "(Tu)" : "(IA)"}
+                {line.character?.name.toUpperCase() ?? "NARRADOR"}
               </span>
               <Wave active={active} />
               {!active && (

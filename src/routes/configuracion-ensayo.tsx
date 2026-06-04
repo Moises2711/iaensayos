@@ -21,10 +21,12 @@ import { TopBar } from "@/components/TopBar";
 import {
   createRehearsalSession,
   getPerfilUsuario,
+  getRecordingsForCharacters,
   getScriptSetup,
   getScripts,
   updatePerfilUsuario,
   updateRehearsalSession,
+  type TeleprompterRecordingRecord,
 } from "@/lib/rehearsal-data";
 
 
@@ -35,7 +37,7 @@ export const Route = createFileRoute("/configuracion-ensayo")({
 });
 
 const MODES = [
-  { icon: User, value: "individual", label: "Individual", desc: "Ensaya solo con IA." },
+  { icon: User, value: "individual", label: "Individual", desc: "Ensaya solo." },
   { icon: Users, value: "grupo", label: "En grupo", desc: "Con otros actores." },
   { icon: BookOpen, value: "lectura", label: "Lectura", desc: "Lectura sin actuacion." },
 ] as const;
@@ -60,7 +62,7 @@ function ConfigEnsayo() {
   const [selectedSceneId, setSelectedSceneId] = useState("");
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
   const [mode, setMode] = useState("individual");
-  const [diff, setDiff] = useState(50);
+  const [selectedRecordings, setSelectedRecordings] = useState<Record<string, string>>({});
   const [emo, setEmo] = useState(true);
   const [improv, setImprov] = useState(true);
   const [feedback, setFeedback] = useState(false);
@@ -83,7 +85,6 @@ function ConfigEnsayo() {
     const profile = profileData?.profile;
     if (!profile) return;
     setMode(profile.rehearsal_mode);
-    setDiff(profile.ai_difficulty);
     setEmo(profile.suggest_emotions);
     setImprov(profile.allow_improv);
     setFeedback(profile.feedback_enabled);
@@ -118,7 +119,6 @@ function ConfigEnsayo() {
     mutationFn: () =>
       updatePerfilUsuario({
         rehearsal_mode: mode,
-        ai_difficulty: diff,
         suggest_emotions: emo,
         allow_improv: improv,
         feedback_enabled: feedback,
@@ -148,7 +148,7 @@ function ConfigEnsayo() {
         sceneId: setup.scene.id,
         selectedCharacterId: selectedCharacter.id,
         mode,
-        aiDifficulty: diff,
+        aiDifficulty: 50,
         suggestEmotions: emo,
         allowImprov: improv,
         feedbackEnabled: feedback,
@@ -248,7 +248,7 @@ function ConfigEnsayo() {
 
           <Section
             title="2. Personajes"
-            subtitle="Selecciona quien interpretas y revisa las voces de IA."
+            subtitle="Selecciona quien interpretas."
             action={
               <button className="inline-flex items-center gap-1.5 text-xs bg-primary/10 text-primary border border-primary/30 rounded-lg px-3 py-1.5">
                 <Plus className="w-3.5 h-3.5" /> Agregar personaje
@@ -258,13 +258,13 @@ function ConfigEnsayo() {
             <div className="space-y-3">
               {(setup?.characters || []).filter(Boolean).map((character) => {
                 const active = selectedCharacterId === character.id;
-                const tag = character.actor_type === "user" ? "Tu" : "IA";
+                const isUser = character.actor_type === "user" || character.id === selectedCharacterId;
 
                 return (
                   <button
                     key={character.id}
                     onClick={() => setSelectedCharacterId(character.id)}
-                    className={`w-full grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center border rounded-lg p-3 text-left transition ${
+                    className={`w-full grid grid-cols-[auto_1fr_1fr_auto] gap-3 items-center border rounded-lg p-3 text-left transition ${
                       active
                         ? "bg-primary/10 border-primary/50"
                         : "bg-surface/60 border-border/40 hover:border-primary/30"
@@ -277,24 +277,19 @@ function ConfigEnsayo() {
                       <div>
                         <div className="text-sm flex items-center gap-1.5">
                           {character.name}
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded ${tag === "Tu" ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}
-                          >
-                            {tag}
-                          </span>
+                          {isUser && active && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
+                              Tu
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           {character.role ?? "Sin rol"}
                         </div>
                       </div>
                     </div>
-                    <MiniValue
-                      label="Voz"
-                      value={character.voice ?? "Sin voz"}
-                      icon={tag === "IA" ? <Volume2 className="w-3.5 h-3.5" /> : null}
-                    />
+                    <MiniValue label="Voz" value={character.voice ?? "Sin voz"} />
                     <MiniValue label="Emocion base" value={character.base_emotion ?? "Neutral"} />
-                    <div />
                     <MoreVertical className="w-4 h-4 text-muted-foreground" />
                   </button>
                 );
@@ -305,49 +300,38 @@ function ConfigEnsayo() {
             </p>
           </Section>
 
-          <div className="grid md:grid-cols-2 gap-5">
-            <Section title="3. Dinamica del ensayo">
-              <p className="text-xs text-muted-foreground mb-2">Modo de ensayo</p>
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {MODES.map((item) => {
-                  const Icon = item.icon;
-                  const active = mode === item.value;
-                  return (
-                    <button
-                      key={item.value}
-                      onClick={() => setMode(item.value)}
-                      className={`p-3 rounded-lg border text-left transition ${
-                        active
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-surface hover:border-primary/30"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 mb-1.5" />
-                      <div className="text-xs font-medium">{item.label}</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mb-2 inline-flex items-center gap-1">
-                Dificultad de la IA <Info className="w-3 h-3" />
-              </p>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={diff}
-                onChange={(e) => setDiff(+e.target.value)}
-                className="w-full accent-primary"
-              />
-              <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-                <span>Facil</span>
-                <span>Media</span>
-                <span>Avanzada</span>
-              </div>
-            </Section>
+          <VoicePersonalizationSection
+            characters={(setup?.characters || []).filter(Boolean)}
+            selectedRecordings={selectedRecordings}
+            onSelect={(name, id) =>
+              setSelectedRecordings((prev) => ({ ...prev, [name]: id }))
+            }
+          />
 
-          </div>
+          <Section title="3. Dinamica del ensayo">
+            <p className="text-xs text-muted-foreground mb-2">Modo de ensayo</p>
+            <div className="grid grid-cols-3 gap-2">
+              {MODES.map((item) => {
+                const Icon = item.icon;
+                const active = mode === item.value;
+                return (
+                  <button
+                    key={item.value}
+                    onClick={() => setMode(item.value)}
+                    className={`p-3 rounded-lg border text-left transition ${
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-surface hover:border-primary/30"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 mb-1.5" />
+                    <div className="text-xs font-medium">{item.label}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </Section>
         </div>
 
         <aside className="bg-card border border-border/60 rounded-xl p-5 h-fit sticky top-6">
@@ -379,11 +363,11 @@ function ConfigEnsayo() {
                   {character.name?.[0] || "?"}
                 </div>
                 <span className="flex-1">{character.name}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded ${character.id === selectedCharacter?.id ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"}`}
-                >
-                  {character.id === selectedCharacter?.id ? "Tu" : "IA"}
-                </span>
+                {character.id === selectedCharacter?.id && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
+                    Tu
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -393,15 +377,10 @@ function ConfigEnsayo() {
 
           <p className="text-[10px] tracking-[0.25em] text-muted-foreground mb-2">CONFIGURACION</p>
           <dl className="text-xs space-y-1.5 mb-5">
-            {[
-              ["Modo de ensayo", selectedMode.label],
-              ["Dificultad de la IA", diff < 33 ? "Facil" : diff < 66 ? "Media" : "Avanzada"],
-            ].map(([key, value]) => (
-              <div key={key} className="flex justify-between gap-2">
-                <dt className="text-muted-foreground">{key}</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
+            <div className="flex justify-between gap-2">
+              <dt className="text-muted-foreground">Modo de ensayo</dt>
+              <dd>{selectedMode.label}</dd>
+            </div>
           </dl>
         </aside>
       </div>
@@ -512,5 +491,99 @@ function ToggleRow({
       </div>
       <Toggle on={on} onChange={onChange} />
     </div>
+  );
+}
+
+function VoicePersonalizationSection({
+  characters,
+  selectedRecordings,
+  onSelect,
+}: {
+  characters: { id: string; name: string }[];
+  selectedRecordings: Record<string, string>;
+  onSelect: (characterName: string, recordingId: string) => void;
+}) {
+  const names = characters.map((c) => c.name);
+  const { data: recordingsMap = {}, isLoading } = useQuery({
+    queryKey: ["character-recordings", names.sort().join("|")],
+    queryFn: () => getRecordingsForCharacters(names),
+    enabled: names.length > 0,
+  });
+
+  const playRecording = (rec: TeleprompterRecordingRecord) => {
+    if (!rec.audio_url) {
+      toast.info("Esta grabación no tiene audio almacenado.");
+      return;
+    }
+    try {
+      const audio = new Audio(rec.audio_url);
+      audio.play();
+    } catch {
+      toast.error("No se pudo reproducir la grabación.");
+    }
+  };
+
+  return (
+    <Section
+      title="4. Personalización de voz"
+      subtitle="Elige una grabación previa para reemplazar la voz de cada personaje."
+    >
+      {isLoading && (
+        <p className="text-xs text-muted-foreground">Cargando grabaciones...</p>
+      )}
+      {!isLoading && characters.length === 0 && (
+        <p className="text-xs text-muted-foreground">Selecciona un libreto con personajes.</p>
+      )}
+      <div className="space-y-3">
+        {characters.map((character) => {
+          const recs = recordingsMap[character.name] ?? [];
+          const selected = selectedRecordings[character.name] ?? "";
+          return (
+            <div
+              key={character.id}
+              className="grid grid-cols-[auto_1fr_auto] gap-3 items-center border border-border/40 rounded-lg p-3 bg-surface/60"
+            >
+              <div className="w-9 h-9 rounded-full bg-primary/15 grid place-items-center text-primary text-sm font-semibold">
+                {character.name?.[0] || "?"}
+              </div>
+              <div>
+                <div className="text-sm">{character.name}</div>
+                {recs.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Sin grabaciones disponibles.
+                  </p>
+                ) : (
+                  <select
+                    value={selected}
+                    onChange={(e) => onSelect(character.name, e.target.value)}
+                    className="mt-1 w-full bg-background border border-border/60 rounded-md px-2 py-1.5 text-xs focus:outline-none focus:border-primary/50"
+                  >
+                    <option value="">Voz por defecto</option>
+                    {recs.map((rec) => (
+                      <option key={rec.id} value={rec.id}>
+                        Grabación {new Date(rec.created_at).toLocaleString()}
+                        {rec.duration_sec ? ` · ${Math.round(Number(rec.duration_sec))}s` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {selected && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rec = recs.find((r) => r.id === selected);
+                    if (rec) playRecording(rec);
+                  }}
+                  className="text-xs px-2.5 py-1.5 rounded-md border border-primary/40 text-primary hover:bg-primary/10"
+                >
+                  ▶
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Section>
   );
 }
